@@ -1,0 +1,37 @@
+{% extends 'flatpages/default.html' %}
+
+{% block title %}
+comment_search
+{% endblock title %}
+
+    <form action="" method="get">
+        {{ filterset.form.as_p }}
+        <input type="submit" value="Найти"/>
+
+    </form>
+
+{% block content %}
+
+    {% if comment_search %}
+       <table>
+           <tr>
+               <td>Автор</td>
+               <td>Заголовок</td>
+
+           </tr>
+
+           {% for comment in search %}
+           <tr>
+               <td>{{ comment.user }}&emsp;</td>
+               <td>{{ comment.text }}&emsp;</td>
+           </tr>
+           {% endfor %}
+
+       </table>
+    {% else %}
+
+       <h2>Новостей нет!</h2>
+
+    {% endif %}
+
+{% endblock content %}

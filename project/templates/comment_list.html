@@ -1,0 +1,35 @@
+{% extends 'main.html' %}
+
+{% block content %}
+
+
+
+<body>
+    <hr>
+
+    <div align="center"><a class="main_button" href="{% url 'startpage' %}" title="Все объявления"><h3 style="text-align: center;"><strong>На главную страницу</strong></h3></a></div>
+    <br>
+
+</body>
+
+{% if comment_list %}
+    {% for i in comment_list %}
+        {% if i.status %}
+            <p>{{ i.created|date:'d.m.y' }}</p>
+            <p>{{ i.text }}</p>
+            <p>{{ i.get_status_display }}</p>
+            <p>Отклик на "{{ i.post.title }}" от пользователя {{ i.user }}</p>
+                 {% if i.status == 'wait' %}
+                      <a href="{% url 'accept' i.id %}">Принять</a>
+                      <a href="{% url 'reject' i.id %}">Отклонить</a>
+                 {% endif %}
+
+
+            <hr>
+        {% endif %}
+    {% endfor %}
+{% else %}
+    Откликов нет
+{% endif %}
+
+{% endblock content %}
