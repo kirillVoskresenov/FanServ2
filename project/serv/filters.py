@@ -21,10 +21,15 @@ class PostFilter(FilterSet):
        }
 
 class CommFilter(FilterSet):
+    date = django_filters.DateFilter(
+        field_name='time_in',
+        widget=forms.DateInput(attrs={'type': 'date'}),
+        lookup_expr='gte',
+        label='Date (beginning with)'
+    )
 
     class Meta:
         model = Comment
         fields = {
-           'user': ['exact'],
-           'text': ['icontains']
+           'user': ['exact']
        }

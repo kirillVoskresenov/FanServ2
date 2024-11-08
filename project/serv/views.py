@@ -137,6 +137,8 @@ class CommentCreate(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
+
+
 class CommentDetail(LoginRequiredMixin, DetailView):
     model = Comment
     permission_required = ('serv.view_comment')
@@ -155,6 +157,24 @@ class CommentList(LoginRequiredMixin, ListView):
     template_name = 'comment_list.html'
     context_object_name = 'comment_list'
     ordering = '-time_in'
+
+    def get_queryset(self):
+        # Получаем обычный запрос
+        queryset = super().get_queryset()
+        # Используем наш класс фильтрации.
+        # self.request.GET содержит объект QueryDict, который мы рассматривали
+        # в этом юните ранее.
+        # Сохраняем нашу фильтрацию в объекте класса,
+        # чтобы потом добавить в контекст и использовать в шаблоне.
+        self.filterset = CommFilter(self.request.GET, queryset)
+        # Возвращаем из функции отфильтрованный список товаров
+        return self.filterset.qs
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Добавляем в контекст объект фильтрации.
+        context['filterset'] = self.filterset
+        return context
 
 class CommentUpdate(PermissionRequiredMixin,LoginRequiredMixin,UpdateView):
     form_class = CommForm
@@ -189,21 +209,43 @@ def upload_media(request, **kwargs):
         form = MediaForm(request.POST, request.FILES)
         if form.is_valid():
             form.save()
-            return render(request, 'success.html', {'form': form, 'obj': obj})
+            return render(request, 'success.html', {'form': form, 'obj': 'obj'})
     else:
         form = MediaForm()
     return render(request, 'upload.html', {'form': form})
+
 
 def accept(request, pk):
     i = get_object_or_404(Comment, pk=pk)
     if i.status == 'wait':
         i.status = 'accepted'
-        i.save
-    return redirect('comment_list')
+        i.save()
+        send_mail(
+            subject=f'Отклик "{i.text[:50]}" на объявление "{i.post.title}" принят', #Более информативная тема
+            message=f'Отклик пользователя {i.user} на объявление "{i.post.title}" был принят.',
+            from_email=os.getenv('DEFAULT_FROM_EMAIL'),
+            recipient_list=[i.user.email] # Отправляем автору объявления
+        )
+        messages.success(request, 'Отклик принят!')
+    else:
+        messages.warning(request, 'Отклик уже обработан.') #Обработка случая, когда статус уже не "wait"
+    return redirect('comment_list')  # или другую страницу, куда нужно перейти
 
 def reject(request, pk):
     i = get_object_or_404(Comment, pk=pk)
     if i.status == 'wait':
         i.status = 'reject'
-        i.save
+        i.save()
+        send_mail(
+            subject=f'Отклик "{i.text[:50]}" на объявление "{i.post.title}" отклонен',
+            message=f'Отклик пользователя {i.user} на объявление "{i.post.title}" был отклонен.',
+            from_email=os.getenv('DEFAULT_FROM_EMAIL'),
+            recipient_list=[i.user.email]
+        )
+        messages.success(request, 'Отклик отклонен!')
+    else:
+        messages.warning(request, 'Отклик уже обработан.')
     return redirect('comment_list')
+
+
+
