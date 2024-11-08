@@ -2,8 +2,6 @@
 
 {% block content %}
 
-
-
 <body>
     <hr>
 
@@ -12,21 +10,25 @@
 
 </body>
 
+<form action="" method="get">
+       {# Переменная, которую мы передали через контекст, может сгенерировать нам форму с полями #}
+       {{ filterset.form.as_p }}
+       {# Добавим кнопку отправки данных формы #}
+       <input type="submit" value="Найти" />
+   </form>
+
+
 {% if comment_list %}
     {% for i in comment_list %}
-        {% if i.status %}
-            <p>{{ i.created|date:'d.m.y' }}</p>
-            <p>{{ i.text }}</p>
-            <p>{{ i.get_status_display }}</p>
-            <p>Отклик на "{{ i.post.title }}" от пользователя {{ i.user }}</p>
-                 {% if i.status == 'wait' %}
-                      <a href="{% url 'accept' i.id %}">Принять</a>
-                      <a href="{% url 'reject' i.id %}">Отклонить</a>
-                 {% endif %}
-
-
-            <hr>
+        <p>{{ i.created|date:'d.m.y' }}</p>
+        <p>{{ i.text }}</p>
+        <p>Статус: {{ i.get_status_display }}</p>  <!-- Используем get_status_display -->
+        <p>Отклик на "{{ i.post.title }}" от пользователя {{ i.user }}</p>
+        {% if i.status == 'wait' %}
+            <a href="{% url 'accept' i.id %}">Принять</a>
+            <a href="{% url 'reject' i.id %}">Отклонить</a>
         {% endif %}
+        <hr>
     {% endfor %}
 {% else %}
     Откликов нет
