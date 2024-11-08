@@ -21,7 +21,7 @@ urlpatterns = [
    path('<int:pk>/delete/', CommentDelete.as_view(), name='comment_delete'),
    path('upload/', upload_media, name='upload'),
    path('accept/<int:pk>', accept, name='accept'),
-   path('reject/<int:pk>', accept, name='reject')
+   path('reject/<int:pk>', reject, name='reject')
 ]
 
 if settings.DEBUG:
