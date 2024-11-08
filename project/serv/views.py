@@ -220,32 +220,37 @@ def accept(request, pk):
     if i.status == 'wait':
         i.status = 'accepted'
         i.save()
-        send_mail(
-            subject=f'Отклик "{i.text[:50]}" на объявление "{i.post.title}" принят', #Более информативная тема
-            message=f'Отклик пользователя {i.user} на объявление "{i.post.title}" был принят.',
-            from_email=os.getenv('DEFAULT_FROM_EMAIL'),
-            recipient_list=[i.user.email] # Отправляем автору объявления
-        )
-        messages.success(request, 'Отклик принят!')
+        try:
+            send_mail(
+                subject=f'Отклик "{i.text[:50]}" на объявление "{i.post.title}" принят',
+                message=f'Ваш отклик на объявление "{i.post.title}" был принят.',
+                from_email=os.getenv('DEFAULT_FROM_EMAIL'),
+                recipient_list=[i.user.email]
+            )
+            messages.success(request, 'Отклик принят!')
+        except Exception as e:
+            messages.error(request, f'Ошибка при отправке уведомления: {e}')
+
     else:
-        messages.warning(request, 'Отклик уже обработан.') #Обработка случая, когда статус уже не "wait"
-    return redirect('comment_list')  # или другую страницу, куда нужно перейти
+        messages.warning(request, 'Отклик уже обработан.')
+    return redirect('comment_list')
 
 def reject(request, pk):
     i = get_object_or_404(Comment, pk=pk)
     if i.status == 'wait':
         i.status = 'reject'
         i.save()
-        send_mail(
-            subject=f'Отклик "{i.text[:50]}" на объявление "{i.post.title}" отклонен',
-            message=f'Отклик пользователя {i.user} на объявление "{i.post.title}" был отклонен.',
-            from_email=os.getenv('DEFAULT_FROM_EMAIL'),
-            recipient_list=[i.user.email]
-        )
-        messages.success(request, 'Отклик отклонен!')
+        try:
+            send_mail(
+                subject=f'Отклик "{i.text[:50]}" на объявление "{i.post.title}" отклонен',
+                message=f'Ваш отклик на объявление "{i.post.title}" был отклонен.',
+                from_email=os.getenv('DEFAULT_FROM_EMAIL'),
+                recipient_list=[i.user.email]
+            )
+            messages.error(request, 'Отклик отклонен!')
+        except Exception as e:
+            messages.error(request, f'Ошибка при отправке уведомления: {e}')
     else:
         messages.warning(request, 'Отклик уже обработан.')
     return redirect('comment_list')
-
-
 

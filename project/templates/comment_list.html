@@ -22,7 +22,7 @@
     {% for i in comment_list %}
         <p>{{ i.created|date:'d.m.y' }}</p>
         <p>{{ i.text }}</p>
-        <p>Статус: {{ i.get_status_display }}</p>  <!-- Используем get_status_display -->
+        <p>Статус: {{ i.get_status_display }}</p>
         <p>Отклик на "{{ i.post.title }}" от пользователя {{ i.user }}</p>
         {% if i.status == 'wait' %}
             <a href="{% url 'accept' i.id %}">Принять</a>
